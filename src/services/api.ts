@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { Venue } from '../models/Venue';
 
-const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+const API_URL = 'https://apiexample.com/';
 
 export interface SyncResult {
   success: boolean;

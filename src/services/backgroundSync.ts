@@ -52,12 +52,12 @@ export const registerBackgroundSync = async () => {
     const isRegistered = await TaskManager.isTaskRegisteredAsync(BACKGROUND_SYNC_TASK);
     
     if (isRegistered) {
-      console.log('[BackgroundSync] Task already registered, unregistering first...');
+      console.log('[BackgroundSync] Task already registered');
       await BackgroundFetch.unregisterTaskAsync(BACKGROUND_SYNC_TASK);
     }
     
     await BackgroundFetch.registerTaskAsync(BACKGROUND_SYNC_TASK, {
-      minimumInterval: 15 * 60, // 15 minutos (mínimo permitido por iOS)
+      minimumInterval: 15 * 60, // 15 minutos
       stopOnTerminate: false,
       startOnBoot: true,
     });
@@ -77,7 +77,6 @@ export const registerBackgroundSync = async () => {
 export const unregisterBackgroundSync = async () => {
   try {
     await BackgroundFetch.unregisterTaskAsync(BACKGROUND_SYNC_TASK);
-    console.log('[BackgroundSync] Background sync unregistered');
   } catch (err) {
     console.error('[BackgroundSync] Failed to unregister:', err);
   }
@@ -114,15 +113,12 @@ const getStatusText = (status: BackgroundFetch.BackgroundFetchStatus) => {
 
 export const testBackgroundSync = async () => {
   try {
-    console.log('[BackgroundSync TEST] Starting manual test...');
     const pendingVenues = await getPendingVenues();
     
     if (pendingVenues.length === 0) {
       console.log('[BackgroundSync TEST] No pending venues');
       return { success: true, message: 'No pending venues to sync', synced: 0 };
     }
-    
-    console.log(`[BackgroundSync TEST] Found ${pendingVenues.length} pending venues`);
     
     const batch = pendingVenues.slice(0, MAX_BATCH_SIZE);
     const result = await sendVenuesBackground(batch);

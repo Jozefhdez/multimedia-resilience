@@ -22,7 +22,7 @@ export const addVenue = async (name: string, latitude: number, longitude: number
       console.log(`[VenueController] Venue ${newVenue.id} synced immediately`);
     }
   } catch (error) {
-    console.log('[VenueController] Immediate sync failed, will retry in background');
+    console.log('[VenueController] Immediate sync failed');
   }
   
   return newVenue;
@@ -38,8 +38,6 @@ export const retryPendingSync = async (): Promise<{ synced: number; failed: numb
   if (pending.length === 0) {
     return { synced: 0, failed: 0 };
   }
-  
-  console.log(`[VenueController] Attempting to sync ${pending.length} pending venues`);
   
   const result = await syncVenues(pending);
   
