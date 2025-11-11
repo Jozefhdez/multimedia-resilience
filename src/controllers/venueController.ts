@@ -1,6 +1,7 @@
 import { Venue } from '../models/Venue';
 import { saveVenue, getAllVenues, getPendingVenues, markAsSynced } from '../services/database';
 import { syncVenues } from '../services/api';
+import logger from '../utils/logger';
 
 export const addVenue = async (name: string, latitude: number, longitude: number): Promise<Venue> => {
   const newVenue: Venue = {
@@ -19,10 +20,10 @@ export const addVenue = async (name: string, latitude: number, longitude: number
     if (result.success && result.syncedIds.includes(newVenue.id)) {
       await markAsSynced(newVenue.id);
       newVenue.synced = true;
-      console.log(`[VenueController] Venue ${newVenue.id} synced immediately`);
+      logger.captureMessage(`[VenueController] Venue ${newVenue.id} synced immediately`, 'info');
     }
   } catch (error) {
-    console.log('[VenueController] Immediate sync failed');
+    logger.captureException(error, { where: 'addVenue', venueId: newVenue.id });
   }
   
   return newVenue;
@@ -39,16 +40,21 @@ export const retryPendingSync = async (): Promise<{ synced: number; failed: numb
     return { synced: 0, failed: 0 };
   }
   
-  const result = await syncVenues(pending);
-  
-  for (const syncedId of result.syncedIds) {
-    await markAsSynced(syncedId);
+  try {
+    const result = await syncVenues(pending);
+    
+    for (const syncedId of result.syncedIds) {
+      await markAsSynced(syncedId);
+    }
+    
+    logger.captureMessage(`[VenueController] Sync result: ${result.syncedIds.length} synced, ${result.failedIds.length} failed`, 'info');
+    
+    return { 
+      synced: result.syncedIds.length, 
+      failed: result.failedIds.length 
+    };
+  } catch (error) {
+    logger.captureException(error, { where: 'retryPendingSync', pendingCount: pending.length });
+    return { synced: 0, failed: pending.length };
   }
-  
-  console.log(`[VenueController] Sync result: ${result.syncedIds.length} synced, ${result.failedIds.length} failed`);
-  
-  return { 
-    synced: result.syncedIds.length, 
-    failed: result.failedIds.length 
-  };
 };

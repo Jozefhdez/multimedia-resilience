@@ -1,5 +1,6 @@
 import * as SQLite from 'expo-sqlite';
 import { Venue } from '../models/Venue';
+import logger from '../utils/logger';
 
 let db: SQLite.SQLiteDatabase | null = null;
 
@@ -24,9 +25,9 @@ export const initDatabase = async () => {
         createdAt TEXT NOT NULL
       );
     `);
-    console.log('Database initialized successfully');
+    logger.captureMessage('Database initialized successfully', 'info');
   } catch (error) {
-    console.error('Error initializing database:', error);
+    logger.captureException(error, { where: 'initDatabase' });
   }
 };
 
@@ -38,7 +39,7 @@ export const saveVenue = async (venue: Venue) => {
       [venue.id, venue.name, venue.latitude, venue.longitude, venue.synced ? 1 : 0, venue.createdAt]
     );
   } catch (error) {
-    console.error('Error saving venue:', error);
+    logger.captureException(error, { where: 'saveVenue', venueId: venue.id });
     throw error;
   }
 };
@@ -56,7 +57,7 @@ export const getAllVenues = async (): Promise<Venue[]> => {
       createdAt: row.createdAt,
     }));
   } catch (error) {
-    console.error('Error getting all venues:', error);
+    logger.captureException(error, { where: 'getAllVenues' });
     return [];
   }
 };
@@ -74,7 +75,7 @@ export const getPendingVenues = async (): Promise<Venue[]> => {
       createdAt: row.createdAt,
     }));
   } catch (error) {
-    console.error('Error getting pending venues:', error);
+    logger.captureException(error, { where: 'getPendingVenues' });
     return [];
   }
 };
@@ -84,6 +85,6 @@ export const markAsSynced = async (id: string) => {
     const database = await getDatabase();
     await database.runAsync('UPDATE venues SET synced = 1 WHERE id = ?', [id]);
   } catch (error) {
-    console.error('Error marking as synced:', error);
+    logger.captureException(error, { where: 'markAsSynced', venueId: id });
   }
 };

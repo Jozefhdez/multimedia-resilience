@@ -17,8 +17,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Esta app necesita acceso a tu ubicación para marcar venues en el mapa."
       },
-      "bundleIdentifier": "com.anonymous.multimediaresilience",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "bundleIdentifier": "com.anonymous.multimediaresilience"
     },
     "android": {
       "adaptiveIcon": {
@@ -38,8 +37,7 @@
           "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
         }
       },
-      "package": "com.anonymous.multimediaresilience",
-      "googleServicesFile": "./google-services.json"
+      "package": "com.anonymous.multimediaresilience"
     },
     "plugins": [
       [
@@ -48,8 +46,14 @@
           "locationAlwaysAndWhenInUsePermission": "Esta app necesita acceso a tu ubicación para marcar venues en el mapa."
         }
       ],
-      "@react-native-firebase/app",
-      "@react-native-firebase/crashlytics"
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "tecnologico-de-monterrey-oc"
+        }
+      ]
     ],
     "web": {
       "favicon": "./assets/favicon.png"
